@@ -1,0 +1,75 @@
+﻿类别,域名/Host,网络用途,归属,QX 处置建议,DNS,TLS,HTTP 探测
+广告 API 主域,ad.zijieapi.com,巨量广告主接口：/api/ad/v1/*、/api/incentive/marketing/done、report、dislike,巨量引擎/穿山甲,整域 REJECT,OK,-,ERR SSLEOFError: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violatio
+广告 API 主域,ads.zijieapi.com,广告服务域（TNC 下发）,巨量引擎,整域 REJECT,OK,TLSv1.2,200 OK
+广告集群 v3,ads3-normal.zijieapi.com,广告请求集群 v3 默认线,巨量引擎,整域 REJECT,OK,TLSv1.3,200 OK
+广告集群 v5,ads5-normal.zijieapi.com,广告请求集群 v5 默认线,巨量引擎,整域 REJECT,OK,TLSv1.3,200 OK
+广告集群 v3,ads3-normal-hl.zijieapi.com,广告请求集群 v3 华东,巨量引擎,整域 REJECT,OK,TLSv1.3,200 OK
+广告集群 v3,ads3-normal-lf.zijieapi.com,广告请求集群 v3 华北,巨量引擎,整域 REJECT,OK,TLSv1.3,200 OK
+广告集群 v3,ads3-normal-lq.zijieapi.com,广告请求集群 v3 华南,巨量引擎,整域 REJECT,OK,TLSv1.3,200 OK
+广告集群 v5,ads5-normal-hl.zijieapi.com,广告请求集群 v5 华东,巨量引擎,整域 REJECT,OK,TLSv1.3,200 OK
+广告集群 v5,ads5-normal-lf.zijieapi.com,广告请求集群 v5 华北,巨量引擎,整域 REJECT,OK,TLSv1.3,200 OK
+广告集群 v5,ads5-normal-lq.zijieapi.com,广告请求集群 v5 华南,巨量引擎,整域 REJECT,OK,TLSv1.3,200 OK
+主 API,api.fqnovel.com,正文/书城 API，同时承载 /api/ad/ 开屏与激励接口,番茄小说自有,仅拦 /api/ad/ 路径,OK,TLSv1.3,404 Not Found
+主 API 集群,api3-normal.fqnovel.com,正文 API v3,番茄小说自有,仅拦 /api/ad/ 路径,OK,TLSv1.3,404 Not Found
+主 API 集群,api5-normal.fqnovel.com,正文 API v5,番茄小说自有,仅拦 /api/ad/ 路径,OK,TLSv1.2,404 Not Found
+主 API 集群,api5-normal-lf.fqnovel.com,正文 API v5 华北,番茄小说自有,仅拦 /api/ad/ 路径,OK,TLSv1.2,404 Not Found
+主 API 集群,api5-normal-sinfonlinea.fqnovel.com,正文 API 新加坡线,番茄小说自有,仅拦 /api/ad/ 路径,OK,TLSv1.3,502 Bad Gateway
+API 网关,reading.snssdk.com,阅读业务网关，承载开屏广告 v15 接口,字节/番茄,仅拦 /api/ad/ 路径,OK,TLSv1.3,404 Not Found
+API 网关,reading-hl.snssdk.com,阅读业务网关 华东,字节/番茄,仅拦 /api/ad/ 路径,OK,TLSv1.3,404 Not Found
+API 网关,reading-lq.snssdk.com,阅读业务网关 华南,字节/番茄,仅拦 /api/ad/ 路径,OK,TLSv1.3,404 Not Found
+广告预加载,ib.snssdk.com,开屏广告预加载 /api/ad/preload_ad/v3/,字节/番茄,仅拦 /api/ad/ 路径,OK,-,ERR SSLEOFError: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violatio
+信息流网关,i.snssdk.com,信息流/激励任务网关,字节/番茄,仅拦 /api/ad/ 路径,OK,TLSv1.3,200 OK
+信息流网关,is.snssdk.com,信息流网关,字节/番茄,仅拦 /api/ad/ 路径,OK,TLSv1.3,200 OK
+反馈网关,ic.snssdk.com,广告反馈/隐私开关 /api/ad/feedback/privacy/,字节/番茄,仅拦 /api/ad/ 路径,OK,TLSv1.3,200 OK
+广告落地页,ad-experience.bytedance.com,开屏广告互动体验设置页 fanqie_novel_splash_ad_interactivity_setting.html,巨量引擎,整域 REJECT,OK,TLSv1.2,404 Not Found
+广告落地页,www.chengzijianzhan.com,橙子建站：广告主落地页托管（site_preload）,巨量引擎,可选 REJECT,OK,TLSv1.3,404 Not Found
+广告埋点,lf3-analytics.bytescm.com,广告 JSSDK /obj/adjssdk/analytics/.../event_sdk_for_external.js,巨量引擎,拦 /obj/adjssdk/ 路径,OK,TLSv1.3,404 Not Found
+广告归因,ma.zijieapi.com,巨量广告归因回传,巨量引擎,可选 REJECT,OK,TLSv1.3,404 Not Found
+广告归因,leads.oceanengine.com,巨量引擎线索/转化回传,巨量引擎,可选 REJECT,OK,TLSv1.3,301 Moved Permanently
+抖音开放,aweme.snssdk.com,含 /falcon/fe_douyin_ad_react/ 广告 dislike 与广告举报页、/aweme/open/export_sdk/report_ad_cpm,抖音开放平台,仅拦上述路径,OK,TLSv1.3,200 OK
+配置中心,polaris.zijieapi.com,AB/配置下发（广告开关也走这里）,字节,不建议拦，会波及功能,OK,-,ERR SSLEOFError: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violatio
+风控,security.zijieapi.com,风控与设备上报,字节,不建议拦，会影响登录,OK,TLSv1.3,404 Not Found
+埋点,mon.zijieapi.com,通用埋点,字节,不建议拦,OK,-,ERR SSLEOFError: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violatio
+埋点,log.zijieapi.com,通用日志,字节,不建议拦,OK,TLSv1.3,404 Not Found
+埋点,rtlog.zijieapi.com,实时日志,字节,不建议拦,OK,TLSv1.3,ERR TimeoutError: The read operation timed out
+
+广告接口路径,用途,所在 Host
+/api/ad/,广告接口总前缀（兜底规则）,ad.zijieapi.com / api*.fqnovel.com / reading*.snssdk.com
+/api/ad/splash/novelapp/v15/,开屏广告请求主接口（v15 竖屏）,reading.snssdk.com
+/api/ad/splash/%@/v15/,开屏广告按场景请求（%@ 为 scene 参数）,reading.snssdk.com
+/api/ad/splash/get_atp_config/,开屏广告 ATP/自动播放配置,api*.fqnovel.com
+/api/ad/splash/stock/realtime/v15/,开屏广告实时库存,api*.fqnovel.com
+/api/ad/v1/splash/stock/,开屏库存 v1,api*.fqnovel.com
+/api/ad/splash/stat/ack/v1/,开屏展示统计回执,api*.fqnovel.com
+/api/ad/v2/ack/splash/,开屏展示 ack v2,api*.fqnovel.com
+/api/ad/splash_shake_switch/,开屏摇一摇开关,api*.fqnovel.com
+/api/ad/preload_ad/v3/,开屏广告预加载 v3,ib.snssdk.com
+/api/ad/union/sdk/get_ads/,联盟 SDK（穿山甲）拉取广告,ads*.zijieapi.com
+/api/ad/v1/aggregate/,广告聚合请求,ad.zijieapi.com
+/api/ad/v1/banner/,Banner 广告位请求,ad.zijieapi.com
+/api/ad/v1/recall_ads/banner/,Banner 广告召回,ad.zijieapi.com
+/api/ad/v1/byte_union/recall_ads/,字节联盟广告召回,ad.zijieapi.com
+/api/ad/v1/inspire/,激励视频（看广告得书币）请求,ad.zijieapi.com
+/api/ad/v1/inspire_send/,激励视频发放回调,ad.zijieapi.com
+/api/ad/v1/live_cmm/,直播/电商广告位,ad.zijieapi.com
+/api/ad/v1/dislike/,广告不感兴趣负反馈,ad.zijieapi.com
+/api/ad/v1/report/,广告曝光/点击上报,ad.zijieapi.com
+/api/ad/v1/report/feedback/,广告反馈上报,ad.zijieapi.com
+/api/ad/feedback/privacy/,个性化广告隐私开关,ic.snssdk.com
+/api/ad/personality_switch/,个性化推荐开关,api*.fqnovel.com
+/api/incentive/marketing/done,激励营销任务完成回执,ad.zijieapi.com
+/reading/reader/bonus/ad_reward/v:version/,阅读时长换广告奖励,api*.fqnovel.com
+/reading/commerceapi/ad/comment/v1/,章末评论区广告位,api*.fqnovel.com
+/reading/commerceapi/ad/mix_game/v1/,章末小游戏广告位,api*.fqnovel.com
+/luckycat/novel/v1/task/get_ad_info,福利中心广告任务信息,api*.fqnovel.com
+/luckycat/novel/v1/report/ad_comment,广告评价上报,api*.fqnovel.com
+/luckycat/novel/v1/task/done/excitation_ad_read_gain,看广告换阅读时长,api*.fqnovel.com
+/luckycat/novel/v1/task/done/excitation_ad_surprise_v2,看广告开宝箱,api*.fqnovel.com
+/luckycat/novel/v1/task/done/excitation_ad_book_ecom_treasure,看广告拿电商宝箱,api*.fqnovel.com
+/luckycat/novel/v1/task/excitation_ad_right/detail,激励广告权益详情,api*.fqnovel.com
+/luckycat/novel/v1/privilege/ad_free,免广告特权（勿拦，拦住会失去免广告状态）,api*.fqnovel.com
+/aweme/open/export_sdk/report_ad_cpm,广告 CPM 上报,aweme.snssdk.com
+/aweme/open/export_sdk/dislike/item,广告负反馈,aweme.snssdk.com
+/falcon/fe_douyin_ad_react/pages/report/,广告举报页（H5）,aweme.snssdk.com
+/obj/adjssdk/analytics/,广告 JSSDK 埋点脚本,lf3-analytics.bytescm.com
+/fanqie_novel_splash_ad_interactivity_setting.html,开屏互动广告设置页,ad-experience.bytedance.com
