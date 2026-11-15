@@ -38,7 +38,7 @@ Quantumult X → **设置 → 重写 → 引用 → 右上角 `+`** → 粘贴�
 | **广告上报** | `/api/ad/v1/report/`、`flash/ack`、`dislike` | 整族拒绝 |
 | **章末 / 剧集插页** | `/reading/commerceapi/ad/*`（comment、mix_game、delivery_plan、patch_plan、feature、report、auth_benefit） | 整族拒绝 |
 | **章末卡片位广告** | `/reading/commerceapi/chapter_end/resource/v1/` | 脚本删广告卡，评论/推荐/优惠券保留 |
-| **正文段落插入广告** | `/reading/reader/full/`、`batch_full/` 里的 `read_flow_ad_type` 非 0 段 | 脚本删段 |
+| **正文段落插入广告** | `/reading/reader/full/`、`batch_full/` 里的 `read_flow_ad_type` 非 0 段 | **不挂脚本**，靠 ② 拦掉素材接口让广告位渲染为空（见下方说明） |
 | **信息流广告卡** | `bookmall/cell/change`、`search/tab` | 脚本删卡 |
 | **广告落地页** | `ad-experience.bytedance.com`、`chengzijianzhan.com` | 整域拒绝 |
 | **广告 JSSDK 埋点** | `lf3-analytics.bytescm.com/obj/adjssdk/` | 整族拒绝 |
@@ -53,9 +53,28 @@ Quantumult X → **设置 → 重写 → 引用 → 右上角 `+`** → 粘贴�
 
 `luckycat` 那几条断掉后，「看广告得书币」「开宝箱」「看广告换阅读时长」这些入口点进去会转圈 —— 因为奖励本身就是广告换来的，广告没了奖励自然也没有。想要奖励就把 conf 里 ⑫⑬ 三行注释掉，代价是广告会回来。
 
-**2. 翻页可能轻微卡顿**
+**2. 红果的免费剧集仍然能解锁（这是刻意保留的）**
 
-`reader/full` 那条挂脚本后，番茄每翻一页要跑一遍 JSON 往返。QX 的 JSC 引擎处理几百 KB 的 body 有可感知延迟。真觉得卡就把 ⑩ 那行注释掉，其余广告不受影响。短剧以视频为主，基本感觉不到。
+第一版把 `/api/ad/v1/inspire/` 也整条 reject 成空 body，结果**红果直接不能播放** —— 短剧的免费集数靠「看广告解锁」，这条是解锁状态机的一部分，客户端解析不到字段就卡在解锁中。
+
+现在用负向断言把它排除在外：
+
+```
+^https?:\/\/[^\/]+\/api\/ad(?!\/v1\/inspire)(?:\/|$|\?) url reject-200
+```
+
+放行之后的链路是：客户端认为「有广告任务」→ 去 `/api/ad/union/sdk/get_ads/` 和 `/api/ad/v1/banner/` 拉素材 → **这两条已经被拦** → 拿不到素材 → 降级跳过广告直接解锁。
+
+结果是解锁正常、广告不出现。番茄没有这条链路，放行它也不影响什么。
+
+## 为什么正文不挂脚本
+
+`/reading/reader/full/` 和 `batch_full/` 一度挂了 `script-response-body` 去删 `read_flow_ad_type` 广告段，实测两个问题：
+
+- 番茄每翻一页跑一次 JSON 往返，QX 的 JSC 处理几百 KB body，**明显卡顿**
+- 红果剧集内容走同一族接口，脚本改写后播放器拿到的数据异常
+
+已经移除。正文里的广告位本身是从 `/api/ad/` 拉素材的，素材接口被 ② 拦掉后广告位就渲染为空，不需要再动内容本身。conf 里保留了两行注释，确实想连内联广告段一起删（且能接受卡顿）可以自己取消。
 
 ## 证书（必须做，否则规则不生效）
 
@@ -131,10 +150,12 @@ A：接口大概率还在，路径版本号会变。重跑一遍逆向（流程�
 
 ## 更新日志
 
-- **2026-11-15** v3：合并为单文件，同时覆盖番茄小说与红果短剧。
-  - 19 条规则，5 条脚本清洗
-  - 补 `commerceapi/ad`（章末插页）、`chapter_end/resource`（章末卡片位）、`reader/full`（正文插段）
-  - 单测 30 项全过
+- **2026-11-15** v4：修红果不能播放 + 番茄翻页卡顿
+  - `/api/ad/v1/inspire/` 改用负向断言排除，不再整条 reject（红果解锁状态机依赖它）
+  - 移除 `reader/full`、`batch_full` 的脚本挂载（卡顿 + 剧集数据异常）
+  - 规则 21 → 19 条，脚本 5 → 3 条
+  - 三向回归：必拦 58 条 100%、必放行 14 条 0 误拦、高频接口 0 脚本
+- **2026-11-15** v3：合并为单文件，同时覆盖番茄小说与红果短剧；补 `commerceapi/ad`、`chapter_end/resource`、`ad/mission`、`excitation_ad_right`、`i-hl/i-lq` MITM
 - **2026-11-15** v2：补上正文/章末插入广告（原版漏了 `/reading/commerceapi/ad/`）
 - **2026-11-15** v1：首版，仅覆盖 `/api/ad/` 与广告集群
 
