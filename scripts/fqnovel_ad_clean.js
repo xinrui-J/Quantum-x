@@ -162,20 +162,25 @@ function clean(node, depth) {
 }
 
 // ── 入口 ────────────────────────────────────────────────────────────────────
+// 快慢双路径：绝大多数翻页没有广告，用字符串预检直接放行，不做 JSON 往返。
+// 只有真的含广告特征时才 parse —— 这是翻页不再卡的关键。
+const QUICK_AD = /read_flow_ad_type"\s*:\s*[1-9]\d*|"ad_info"\s*:\s*\{[^}]|"is_ad"\s*:\s*(?:1|true)|"insert_ad"\s*:\s*(?:1|true)|"chapter_end_ad"\s*:\s*\{[^}]|"splash_ad"\s*:\s*\{[^}]|"ad_list"\s*:\s*\[\s*\{/;
+
 try {
   const body = $response.body;
 
   if (!body || body.length < 2) {
     $done({});
   } else if (body.length > SIZE_LIMIT) {
-    // 太大，判不起，直接放过（正文接口常走到这里）
+    $done({});
+  } else if (!QUICK_AD.test(body)) {
+    // 无广告特征：零解析开销，原样放行
     $done({});
   } else {
     let obj;
     try {
       obj = JSON.parse(sealBigInt(body));
     } catch (e) {
-      // 非 JSON，原样放行
       $done({});
       obj = null;
     }
@@ -186,7 +191,6 @@ try {
         console.log('[fqnovel_ad] 清除广告节点 ' + removed + ' 个');
         $done({ body: unsealBigInt(JSON.stringify(cleaned)) });
       } else {
-        // 没广告，一个字都不改，避免无谓的 JSON 往返
         $done({});
       }
     }
