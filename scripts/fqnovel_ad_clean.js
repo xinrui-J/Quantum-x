@@ -1,8 +1,10 @@
 /**
- * 番茄小说 iOS 广告响应体清洗脚本 (Quantumult X script-response-body)
+ * 番茄小说 / 红果短剧 广告响应体清洗脚本 (Quantumult X script-response-body)
  * ---------------------------------------------------------------------------
- * 适用：fqnovel_ad_pro.conf 里的 ⑦ 组规则
- * 来源：Reading.app 7.4.3 主二进制中出现的广告字段与方法名
+ * 适用：fqnovel_ad_pro.conf 里全部 script-response-body 规则
+ *       （chapter_end/resource、reader/full、batch_full、bookmall/cell/change、search/tab）
+ * 来源：Reading.app 与 Eggplant.app（均 7.4.3）主二进制中出现的广告字段与方法名
+ *       两者同为 com.dragon / com.phoenix 双产品，广告字段出现次数逐个相同
  *   _ad_info / __ad_info / _ad_extra_data / _ad_extra_dict / _ad_id / _ad_type
  *   _native_site_ad_info / _has_ad_info / _is_ad_channel / _comment_ad_type
  *   _read_flow_ad_type / _rit_identity / _report_ad_id / _csj_ad_id / _ios_csj_ad_id
