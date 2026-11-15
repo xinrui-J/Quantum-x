@@ -29,11 +29,32 @@ https://cdn.jsdelivr.net/gh/xinrui-j/Quantum-x@main/fqnovel_ad.conf
 
 | 文件 | 强度 | 效果 | 风险 |
 |---|---|---|---|
-| `fqnovel_ad_lite.conf` | A 档 | 激励视频、Banner、联盟广告、广告上报全灭。**开屏广告可能还在**（开屏走主 API） | 零风险，不 MITM 主 API |
-| `fqnovel_ad.conf` | B 档 | 上面全部 + **开屏广告**也灭 | 需 MITM 主 API |
-| `fqnovel_ad_pro.conf` | B 档 + 脚本 | 上面全部 + **书城「换一换」和搜索结果里的广告卡**也删 | 同 B 档，另有 8 条限制，见下文 |
+| `fqnovel_ad_lite.conf` | A 档 | 激励视频、Banner、联盟广告、广告上报全灭。**开屏和章末插页广告还在**（它们走主 API） | 零风险，不 MITM 主 API |
+| `fqnovel_ad.conf` | B 档 | 上面全部 + **开屏广告** + **章末插页广告**（`/reading/commerceapi/ad/*`） | 需 MITM 主 API |
+| `fqnovel_ad_pro.conf` | B 档 + 脚本 | 上面全部 + **章末卡片位里的广告卡** + **书城「换一换」和搜索结果的广告卡** | 同 B 档，另有 8 条限制，见下文 |
 
 **建议顺序**：先上 `fqnovel_ad.conf`，用两天没问题再换 `pro`。App 出现转圈/网络异常就退回 `lite`。
+
+## 正文和章末的广告是怎么处理的
+
+这是这套规则里最容易漏的一块，因为**它不在 `/api/ad/` 下面**。
+
+逆向出来的证据链：
+
+- `ad_insert_failed, adId=%@, chapterId=%@, paraId=%@` —— 广告是**按段落**插进正文的，有 `paraId`
+- `ad_insert_interval` / `ad_insert_config` / `insert_ad_rit_type` / `natural_ad_insert_fix_v703` —— 插入间隔与投放配置
+- `ad_page:chapter_end` / `ad_page:cartoon` / `ad_page:mini` —— 广告页类型
+- `chapter_end_ad` / `chapter_end_ad_card` / `chapter_end_ad_inspire` / `reader_ad_chapter_end` / `chapter_end_qianchuan` —— 章末广告开关族
+
+对应的接口分两组：
+
+| 接口 | 用途 | 处理方式 |
+|---|---|---|
+| `/reading/commerceapi/ad/*` | 章末插页广告独立族：`comment`（评论区广告位）、`mix_game`（小游戏）、`delivery_plan`（投放计划）、`patch_plan`、`feature`、`report`、`auth_benefit`、`remain/landing_schema` | **整族 reject**（`fqnovel_ad.conf` 起就生效） |
+| `/reading/commerceapi/chapter_end/resource/v1/` | 章末**所有**资源位：广告卡 + 评论卡 + 推荐书 + 优惠券混在一起 | **不能整条 reject**（会连评论推荐一起干掉），交给脚本按广告特征删卡，其余保留 |
+| `/reading/reader/full/` | 正文，段落数组里可能夹 `read_flow_ad_type` 非 0 的广告段 | pro 版默认注释，想连段落间原生广告一起清就取消注释（会卡） |
+
+脚本判定广告段的依据（都有二进制出处）：`read_flow_ad_type` 非 0、`insert_ad` 为真、`ad_info` 存在、`cell_type` 命中广告枚举、「广告主 ID / 落地页 / 广告信息块」三选二。30 项单元测试里专门覆盖了「正文段落插入广告」「章末卡片位广告卡删掉但评论和推荐保留」两种情况。
 
 ## 证书（必须做，否则规则不生效）
 

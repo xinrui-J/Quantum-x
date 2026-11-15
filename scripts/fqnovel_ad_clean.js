@@ -38,7 +38,9 @@ const AD_CONTAINER_KEYS = [
   'ad_data', 'ad_list', 'ads', 'splash_ad', 'splash_ad_list', 'splash_data',
   'banner_list', 'banner_ad', 'inspire_ad', 'reward_ad', 'union_ad',
   'recall_ads', 'aggregate_ads', 'ad_slot_list', 'material_list',
-  'draw_info', 'ad_draw_info'
+  'draw_info', 'ad_draw_info',
+  // 章末/阅读页插入广告
+  'chapter_end_ad', 'insert_ads', 'insert_ad_list', 'ad_cards', 'native_ad_list'
 ];
 
 const AD_TYPE_RE = /^(ad|ads|advert|advertisement|splash_ad|splashad|banner_ad|bannerad|inspire_ad|inspiread|reward_ad|rewardad|union_ad|unionad|mix_ad|mixad|ecom_ad|live_ad|game_ad|app_ad)$/i;
@@ -61,6 +63,13 @@ function unsealBigInt(text) {
 // ── 判定 ────────────────────────────────────────────────────────────────────
 function isAdCell(o) {
   if (!o || typeof o !== 'object' || Array.isArray(o)) return false;
+
+  // 0) 阅读流插入广告：二进制证据 ad_insert_interval / insert_ad_rit_type /
+  //    natural_ad_insert_fix_v703 / ad_insert_failed(adId,chapterId,paraId)
+  //    —— 广告是按段落插进正文的，read_flow_ad_type 非 0 即该段是广告
+  if (o.read_flow_ad_type !== undefined && o.read_flow_ad_type !== null &&
+      o.read_flow_ad_type !== 0 && o.read_flow_ad_type !== '0') return true;
+  if (o.insert_ad === true || o.insert_ad === 1 || o.is_insert_ad === true) return true;
 
   // 1) 布尔 / 数值广告标记（显式声明，最强信号）
   if (o.is_ad === true || o.is_ad === 1 || o.is_ad === '1') return true;
