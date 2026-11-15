@@ -52,7 +52,7 @@ https://cdn.jsdelivr.net/gh/xinrui-j/Quantum-x@main/fqnovel_ad_pro.conf
 
 | 接口 | 用途 | 处理方式 |
 |---|---|---|
-| `/reading/commerceapi/ad/*` | 章末插页广告独立族：`comment`（评论区广告位）、`mix_game`（小游戏）、`delivery_plan`（投放计划）、`patch_plan`、`feature`、`report`、`auth_benefit`、`remain/landing_schema` | **整族 reject**（`fqnovel_ad.conf` 起就生效） |
+| `/reading/commerceapi/ad/*` | 章末插页广告独立族：`comment`（评论区广告位）、`mix_game`（小游戏）、`delivery_plan`（投放计划）、`patch_plan`、`feature`、`report`、`auth_benefit`、`remain/landing_schema` | **整族 reject**（本版即生效） |
 | `/reading/commerceapi/chapter_end/resource/v1/` | 章末**所有**资源位：广告卡 + 评论卡 + 推荐书 + 优惠券混在一起 | **不能整条 reject**（会连评论推荐一起干掉），交给脚本按广告特征删卡，其余保留 |
 | `/reading/reader/full/` | 正文，段落数组里可能夹 `read_flow_ad_type` 非 0 的广告段 | pro 版默认注释，想连段落间原生广告一起清就取消注释（会卡） |
 
