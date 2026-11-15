@@ -1,10 +1,8 @@
 /**
- * 番茄小说 / 红果短剧 广告响应体清洗脚本 (Quantumult X script-response-body)
+ * 番茄小说 iOS 广告响应体清洗脚本 (Quantumult X script-response-body)
  * ---------------------------------------------------------------------------
- * 适用：fqnovel_ad_pro.conf 里全部 script-response-body 规则
- *       （chapter_end/resource、reader/full、batch_full、bookmall/cell/change、search/tab）
- * 来源：Reading.app 与 Eggplant.app（均 7.4.3）主二进制中出现的广告字段与方法名
- *       两者同为 com.dragon / com.phoenix 双产品，广告字段出现次数逐个相同
+ * 适用：fqnovel_ad_pro.conf 里的 ⑦ 组规则
+ * 来源：Reading.app 7.4.3 主二进制中出现的广告字段与方法名
  *   _ad_info / __ad_info / _ad_extra_data / _ad_extra_dict / _ad_id / _ad_type
  *   _native_site_ad_info / _has_ad_info / _is_ad_channel / _comment_ad_type
  *   _read_flow_ad_type / _rit_identity / _report_ad_id / _csj_ad_id / _ios_csj_ad_id
@@ -47,13 +45,6 @@ const AD_CONTAINER_KEYS = [
 
 const AD_TYPE_RE = /^(ad|ads|advert|advertisement|splash_ad|splashad|banner_ad|bannerad|inspire_ad|inspiread|reward_ad|rewardad|union_ad|unionad|mix_ad|mixad|ecom_ad|live_ad|game_ad|app_ad)$/i;
 
-// 评论数据保护：这些字段存在且非空时，绝不把该节点当广告删除
-const PROTECT_KEYS = [
-  'comment_list', 'comments', 'comment_info', 'comment',
-  'reply_list', 'replies', 'reply',
-  'ugc_comment', 'novel_comment', 'book_comment'
-];
-
 // ── 大整数保护 ──────────────────────────────────────────────────────────────
 // 只处理「值位置」上的 16 位以上整数：冒号/中括号/逗号之后，逗号/右括号之前
 const BIG_INT_SEAL = /([:\[,]\s*)(-?\d{16,})(?=\s*[,\}\]])/g;
@@ -73,16 +64,9 @@ function unsealBigInt(text) {
 function isAdCell(o) {
   if (!o || typeof o !== 'object' || Array.isArray(o)) return false;
 
-  // 0) 评论数据保护：带评论内容的节点一律不当作广告删
-  //    （chapter_end/resource 里评论卡与广告卡混排，误删会导致评论区空白）
-  for (let i = 0; i < PROTECT_KEYS.length; i++) {
-    const v = o[PROTECT_KEYS[i]];
-    if (v !== undefined && v !== null && (Array.isArray(v) ? v.length > 0 : v !== '')) return false;
-  }
-
-  // 0b) 阅读流插入广告：二进制证据 ad_insert_interval / insert_ad_rit_type /
-  //     natural_ad_insert_fix_v703 / ad_insert_failed(adId,chapterId,paraId)
-  //     —— 广告是按段落插进正文的，read_flow_ad_type 非 0 即该段是广告
+  // 0) 阅读流插入广告：二进制证据 ad_insert_interval / insert_ad_rit_type /
+  //    natural_ad_insert_fix_v703 / ad_insert_failed(adId,chapterId,paraId)
+  //    —— 广告是按段落插进正文的，read_flow_ad_type 非 0 即该段是广告
   if (o.read_flow_ad_type !== undefined && o.read_flow_ad_type !== null &&
       o.read_flow_ad_type !== 0 && o.read_flow_ad_type !== '0') return true;
   if (o.insert_ad === true || o.insert_ad === 1 || o.is_insert_ad === true) return true;
@@ -162,25 +146,20 @@ function clean(node, depth) {
 }
 
 // ── 入口 ────────────────────────────────────────────────────────────────────
-// 快慢双路径：绝大多数翻页没有广告，用字符串预检直接放行，不做 JSON 往返。
-// 只有真的含广告特征时才 parse —— 这是翻页不再卡的关键。
-const QUICK_AD = /read_flow_ad_type"\s*:\s*[1-9]\d*|"ad_info"\s*:\s*\{[^}]|"is_ad"\s*:\s*(?:1|true)|"insert_ad"\s*:\s*(?:1|true)|"chapter_end_ad"\s*:\s*\{[^}]|"splash_ad"\s*:\s*\{[^}]|"ad_list"\s*:\s*\[\s*\{/;
-
 try {
   const body = $response.body;
 
   if (!body || body.length < 2) {
     $done({});
   } else if (body.length > SIZE_LIMIT) {
-    $done({});
-  } else if (!QUICK_AD.test(body)) {
-    // 无广告特征：零解析开销，原样放行
+    // 太大，判不起，直接放过（正文接口常走到这里）
     $done({});
   } else {
     let obj;
     try {
       obj = JSON.parse(sealBigInt(body));
     } catch (e) {
+      // 非 JSON，原样放行
       $done({});
       obj = null;
     }
@@ -191,6 +170,7 @@ try {
         console.log('[fqnovel_ad] 清除广告节点 ' + removed + ' 个');
         $done({ body: unsealBigInt(JSON.stringify(cleaned)) });
       } else {
+        // 没广告，一个字都不改，避免无谓的 JSON 往返
         $done({});
       }
     }
