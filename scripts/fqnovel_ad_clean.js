@@ -47,6 +47,13 @@ const AD_CONTAINER_KEYS = [
 
 const AD_TYPE_RE = /^(ad|ads|advert|advertisement|splash_ad|splashad|banner_ad|bannerad|inspire_ad|inspiread|reward_ad|rewardad|union_ad|unionad|mix_ad|mixad|ecom_ad|live_ad|game_ad|app_ad)$/i;
 
+// 评论数据保护：这些字段存在且非空时，绝不把该节点当广告删除
+const PROTECT_KEYS = [
+  'comment_list', 'comments', 'comment_info', 'comment',
+  'reply_list', 'replies', 'reply',
+  'ugc_comment', 'novel_comment', 'book_comment'
+];
+
 // ── 大整数保护 ──────────────────────────────────────────────────────────────
 // 只处理「值位置」上的 16 位以上整数：冒号/中括号/逗号之后，逗号/右括号之前
 const BIG_INT_SEAL = /([:\[,]\s*)(-?\d{16,})(?=\s*[,\}\]])/g;
@@ -66,9 +73,16 @@ function unsealBigInt(text) {
 function isAdCell(o) {
   if (!o || typeof o !== 'object' || Array.isArray(o)) return false;
 
-  // 0) 阅读流插入广告：二进制证据 ad_insert_interval / insert_ad_rit_type /
-  //    natural_ad_insert_fix_v703 / ad_insert_failed(adId,chapterId,paraId)
-  //    —— 广告是按段落插进正文的，read_flow_ad_type 非 0 即该段是广告
+  // 0) 评论数据保护：带评论内容的节点一律不当作广告删
+  //    （chapter_end/resource 里评论卡与广告卡混排，误删会导致评论区空白）
+  for (let i = 0; i < PROTECT_KEYS.length; i++) {
+    const v = o[PROTECT_KEYS[i]];
+    if (v !== undefined && v !== null && (Array.isArray(v) ? v.length > 0 : v !== '')) return false;
+  }
+
+  // 0b) 阅读流插入广告：二进制证据 ad_insert_interval / insert_ad_rit_type /
+  //     natural_ad_insert_fix_v703 / ad_insert_failed(adId,chapterId,paraId)
+  //     —— 广告是按段落插进正文的，read_flow_ad_type 非 0 即该段是广告
   if (o.read_flow_ad_type !== undefined && o.read_flow_ad_type !== null &&
       o.read_flow_ad_type !== 0 && o.read_flow_ad_type !== '0') return true;
   if (o.insert_ad === true || o.insert_ad === 1 || o.is_insert_ad === true) return true;
